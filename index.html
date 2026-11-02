@@ -1,5 +1,5 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Бот-шутник · день 1</title>
+<title>Токен в .env и бот-шутник · день 1</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,7 +158,7 @@ details.hint summary { cursor: pointer; font-weight: 600; color: var(--accent); 
 details.hint[open] { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 details.hint[open] summary { margin-bottom: 4px; }
 
-.two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.two-col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .col-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
 
 /* шпаргалка */
@@ -197,27 +197,26 @@ button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visibl
 <main class="wrap">
   <section class="hero">
     <div class="eyebrow">День 1</div>
-    <h1>Бот-шутник: токен в .env, /start и эхо</h1>
-    <p><b>Цель</b> — безопасный бот-шутник: хранение токена в файле .env, обработка команды /start, эхо без повторения команд и случайные шутки из списка.</p>
+    <h1>Токен в .env и бот-шутник</h1>
+    <p><b>Цель</b> — безопасное хранение токена в файле .env и бот-шутник, который отвечает случайной шуткой.</p>
     <ol class="steps">
-      <li><b>1</b><span>Токен в .env</span></li>
-      <li><b>2</b><span>Бот читает токен из .env</span></li>
-      <li><b>3</b><span>/start и эхо без команд</span></li>
-      <li><b>4</b><span>Эхо-громкоговоритель</span></li>
+      <li><b>1</b><span>Установить python-dotenv</span></li>
+      <li><b>2</b><span>Создать .env и перенести токен</span></li>
+      <li><b>3</b><span>Изменить начало bot.py</span></li>
+      <li><b>4</b><span>Запустить и проверить</span></li>
       <li><b>5</b><span>Бот-шутник</span></li>
-      <li><b>6</b><span>Своя коллекция и команда /fact</span></li>
+      <li><b>6</b><span>Свои шутки</span></li>
     </ol>
     <div class="legend">
-      <div class="legend-row"><b>Вариант 1</b> — код почти готов. Впиши пропуски <span class="blank-demo">&nbsp;&nbsp;&nbsp;&nbsp;</span>, нажми «Проверить», затем перепиши код в PyCharm.</div>
-      <div class="legend-row"><b>Вариант 2</b> — есть задача и пример диалога, код пишешь сам в PyCharm. Застрял — открой подсказку.</div>
+      <div class="legend-row">Работаем с эхо-ботом, который уже есть в проекте <code>my_bot</code>. В каждом шаге показано, <b>что было</b> и <b>что должно стать</b> в файле. Код можно скопировать кнопкой «Скопировать» и вставить в PyCharm.</div>
       <div class="legend-row">Номер задания совпадает с номером шага на экране. Сделал — отметь «Готово».</div>
     </div>
     <details class="pycharm">
       <summary>Как работать в PyCharm</summary>
       <ol>
-        <li><b>Проект.</b> Открой проект с эхо-ботом или создай новый: <b>File → New Project</b>, интерпретатор — Python 3.12 (Project venv).</li>
-        <li><b>Библиотеки.</b> Внизу открой <b>Terminal</b> (<kbd>Alt</kbd>+<kbd>F12</kbd>) и выполни <code>pip install python-telegram-bot python-dotenv</code>.</li>
-        <li><b>Файлы.</b> Правый клик по папке проекта → <b>New → File</b> (для <code>.env</code> и <code>.gitignore</code>) или <b>New → Python File</b> (для <code>bot.py</code>).</li>
+        <li><b>Проект.</b> Открой проект <code>my_bot</code> с эхо-ботом: <b>File → Open</b>. Интерпретатор — Python 3.12.</li>
+        <li><b>Терминал.</b> Внизу открой <b>Terminal</b> (<kbd>Alt</kbd>+<kbd>F12</kbd>) — там выполняем <code>pip install</code>.</li>
+        <li><b>Файлы.</b> Правый клик по папке проекта → <b>New → File</b> (для <code>.env</code> и <code>.gitignore</code>).</li>
         <li><b>Код с сайта.</b> «Скопировать» → в PyCharm <kbd>Ctrl</kbd>+<kbd>V</kbd>. Отступы внутри функций — 4 пробела, PyCharm ставит их сам.</li>
         <li><b>Запуск.</b> Правый клик по <code>bot.py</code> → <b>Run 'bot'</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F10</kbd>). Дальше — зелёный треугольник вверху.</li>
         <li><b>Перезапуск после правок.</b> Кнопка <b>Rerun</b> (<kbd>Ctrl</kbd>+<kbd>F5</kbd>): старая копия остановится, новая запустится. Остановить — красный квадрат (<kbd>Ctrl</kbd>+<kbd>F2</kbd>).</li>
@@ -233,14 +232,13 @@ button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visibl
       <table>
         <thead><tr><th>Что видим</th><th>Что сделать</th></tr></thead>
         <tbody>
-          <tr><td>No module named 'dotenv' / 'telegram'</td><td>В терминале PyCharm: <code>pip install python-telegram-bot python-dotenv</code></td></tr>
-          <tr><td>Нет BOT_TOKEN</td><td>Файл <code>.env</code> лежит рядом с <code>bot.py</code>, называется ровно <code>.env</code>, внутри <code>BOT_TOKEN=…</code> без кавычек и пробелов</td></tr>
+          <tr><td>No module named 'dotenv'</td><td>В терминале PyCharm: <code>pip install python-dotenv</code></td></tr>
+          <tr><td>Нет BOT_TOKEN: проверь файл .env</td><td>Файл <code>.env</code> лежит в папке <code>my_bot</code> рядом с <code>bot.py</code>, называется ровно <code>.env</code>, внутри <code>BOT_TOKEN=…</code> без кавычек и пробелов</td></tr>
           <tr><td>InvalidToken</td><td>Токен скопирован не полностью или с лишним символом. Скопируй заново из @BotFather</td></tr>
+          <tr><td>NameError: name 'os' / 'random' is not defined</td><td>Нет нужной строки <code>import</code> в начале файла</td></tr>
           <tr><td>Conflict: terminated by other getUpdates</td><td>Бот запущен дважды. Останови лишние запуски красным квадратом и перезапускай через Rerun</td></tr>
-          <tr><td>Бот повторяет /joke вместо шутки</td><td>В фильтре эха нет <code>~filters.COMMAND</code> или эхо стоит выше команд</td></tr>
-          <tr><td>NameError: name 'CommandHandler' / 'random' is not defined</td><td>Не дописан импорт в начале файла</td></tr>
           <tr><td>IndentationError</td><td>Внутри функции отступ ровно 4 пробела. Выдели код и нажми <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>L</kbd></td></tr>
-          <tr><td>Изменения не работают</td><td>Файл сохранён, но бот не перезапущен: нажми Rerun (<kbd>Ctrl</kbd>+<kbd>F5</kbd>)</td></tr>
+          <tr><td>Бот отвечает по-старому</td><td>Бот не перезапущен: нажми Rerun (<kbd>Ctrl</kbd>+<kbd>F5</kbd>)</td></tr>
         </tbody>
       </table>
     </div>
@@ -257,77 +255,106 @@ const PRACTICES = [
 {
   id: "p1", title: "Задания по шагам", goal: "",
   basic: [
-    { title: "Токен в .env",
-      slide: ["Установить python-dotenv", "Создать файлы .env и .gitignore", "Вписать свой токен в .env"],
-      body: `<p>Переносим токен из кода в отдельный файл. Открой в PyCharm проект с эхо-ботом (или создай новый) и установи библиотеку в терминале PyCharm.</p>`,
-      code: [{ file: "терминал PyCharm", lang: "shell", src: R`pip install python-telegram-bot ⟦python-dotenv⟧` }],
-      after: `<p>Рядом с <code>bot.py</code> создай два файла: правый клик по папке проекта → <b>New → File</b> → имя файла. Вставь свой токен вместо примера — без кавычек и пробелов вокруг «=».</p>`,
+    { title: "Установи библиотеку python-dotenv",
+      body: `<p>Открой в PyCharm свой проект <code>my_bot</code> с эхо-ботом. Внизу открой <b>Terminal</b> (<kbd>Alt</kbd>+<kbd>F12</kbd>) и выполни команду:</p>`,
+      code: [{ file: "терминал PyCharm", lang: "shell", src: R`pip install python-dotenv` }],
+      after: `<p>Должно появиться <code>Successfully installed python-dotenv…</code>. Эта библиотека умеет читать файл <code>.env</code>.</p>` },
+
+    { title: "Создай файл .env и перенеси туда токен",
+      body: `<ol><li>Правый клик по папке <code>my_bot</code> → <b>New → File</b> → имя файла <code>.env</code> (с точкой в начале).</li><li>Найди в <code>bot.py</code> свой токен — он стоит в кавычках в строке <code>TOKEN = "…"</code>.</li><li>Вставь токен в <code>.env</code> вот так: без кавычек и без пробелов вокруг «=».</li></ol>`,
+      code: [{ file: ".env", lang: "plain", src: R`BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz` }],
+      after: `<p>Здесь пример — вместо него твой токен. Ещё создай файл <code>.gitignore</code> с одной строкой: так <code>.env</code> не попадёт в интернет, если выложить проект на GitHub.</p>`,
       twoCol: [
-        { label: "Файл .env", file: ".env", lang: "plain", src: R`⟦BOT_TOKEN⟧=7712345678:AAHk3v…твой_токен` },
-        { label: "Файл .gitignore", file: ".gitignore", lang: "plain", src: R`⟦.env⟧
-.venv/` }],
+        { label: "Файл .gitignore", file: ".gitignore", lang: "plain", src: R`.env` },
+        { label: "Папка проекта теперь", file: "my_bot/", lang: "plain", src: R`my_bot/
+├── .env
+├── .gitignore
+└── bot.py` }],
       callout: ["info", "<b>Нет бота или токена?</b> Открой в Telegram <code>@BotFather</code> → <code>/newbot</code> → придумай имя и username, который заканчивается на <code>bot</code>. BotFather пришлёт токен — его и вставляй в <code>.env</code>."] },
-    { title: "Бот читает токен из .env",
-      slide: ["Заменить начало bot.py шаблоном", "Запустить бота и проверить эхо", "Переименовать .env и увидеть понятную ошибку"],
-      body: `<p>Перепиши <code>bot.py</code>: токен берём из <code>.env</code>, а если его нет — программа сразу говорит, что не так. Заполни пропуски, нажми «Проверить», скопируй код в PyCharm и запусти.</p>`,
-      code: [{ file: "bot.py", lang: "py", src: R`import os
+
+    { title: "Измени начало bot.py",
+      body: `<p>Меняем только верх файла — до строки <code>async def echo</code>. Функции <code>echo</code> и <code>main</code> не трогаем.</p>`,
+      twoCol: [
+        { label: "Было", file: "bot.py · начало", lang: "py", src: R`from telegram.ext import Application, MessageHandler, filters
+
+TOKEN = "ВАШ_ТОКЕН"` },
+        { label: "Стало", file: "bot.py · начало", lang: "py", src: R`import os
 import sys
-from dotenv import ⟦load_dotenv⟧
+from dotenv import load_dotenv
 from telegram.ext import Application, MessageHandler, filters
 
-⟦load_dotenv⟧()
-TOKEN = os.⟦getenv⟧("BOT_TOKEN")
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN:
-    sys.⟦exit⟧("Нет BOT_TOKEN: проверь файл .env")
+    sys.exit("Нет BOT_TOKEN: проверь файл .env")` }],
+      after: `<ul><li><code>import os</code>, <code>import sys</code> — встроенные модули Python, устанавливать не нужно.</li><li><code>load_dotenv()</code> читает файл <code>.env</code>.</li><li><code>os.getenv("BOT_TOKEN")</code> достаёт оттуда токен.</li><li><code>if not TOKEN</code> — если токена нет, программа сразу пишет, что не так, и останавливается.</li></ul>` },
+
+    { title: "Запусти и проверь",
+      body: `<p>Весь <code>bot.py</code> теперь выглядит так. Сравни со своим или скопируй целиком.</p>`,
+      code: [{ file: "bot.py", lang: "py", src: R`import os
+import sys
+from dotenv import load_dotenv
+from telegram.ext import Application, MessageHandler, filters
+
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
+if not TOKEN:
+    sys.exit("Нет BOT_TOKEN: проверь файл .env")
 
 
 async def echo(update, context):
-    await update.message.reply_text(update.message.text)
+    text = update.message.text
+    await update.message.reply_text(text)
 
 
 def main():
-    app = Application.builder().token(⟦TOKEN⟧).build()
+    app = Application.builder().token(TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT, echo))
-    print("Бот запущен. Остановить: красный квадрат в PyCharm")
     app.run_polling()
 
 
 if __name__ == "__main__":
     main()` }],
-      chat: [["me","Я кот"],["bot","Я кот"]],
-      after: `<p><b>Проверь защиту:</b> переименуй <code>.env</code> в <code>x.env</code> и запусти — внизу PyCharm должно появиться «Нет BOT_TOKEN: проверь файл .env». Верни имя обратно.</p>` },
-    { title: "/start и эхо без команд",
-      slide: ["Отправить боту /start — увидеть ошибку", "Добавить функцию start и CommandHandler", "Исправить фильтр эха: & ~filters.COMMAND"],
-      body: `<p>Отправь боту <code>/start</code>: эхо повторит команду. Исправляем: допиши <code>CommandHandler</code> в строку импорта, добавь функцию <code>start</code> выше <code>main()</code> и замени <code>main()</code>.</p>`,
-      code: [{ file: "bot.py · импорт", lang: "py", src: R`from telegram.ext import Application, ⟦CommandHandler⟧, MessageHandler, filters` },
-        { file: "bot.py · функция start", lang: "py", src: R`async def start(update, context):
-    await update.message.⟦reply_text⟧(
-        "Привет! Я бот-шутник 🤖\n"
-        "Напиши что-нибудь — отвечу по-своему.\n"
-        "Хочешь шутку? Жми /joke"
-    )` },
-        { file: "bot.py · main()", lang: "py", src: R`def main():
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("⟦start⟧", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.⟦COMMAND⟧, echo))
-    print("Бот запущен. Остановить: красный квадрат в PyCharm")
-    app.run_polling()` }],
-      chat: [["me","/start"],["bot","Привет! Я бот-шутник 🤖\nНапиши что-нибудь — отвечу по-своему.\nХочешь шутку? Жми /joke"],["me","Я кот"],["bot","Я кот"]],
-      after: `<p><b>Эксперимент:</b> поменяй две строки <code>add_handler</code> местами и убери <code>&amp; ~filters.COMMAND</code>. Что ответит бот на <code>/start</code>? Верни как было.</p>` },
-    { title: "Эхо-громкоговоритель",
-      slide: ["Заменить функцию echo", "upper() — заглавные буквы", "len() — число символов"],
-      body: `<p>Замени функцию <code>echo</code>: бот «кричит» — повторяет текст ЗАГЛАВНЫМИ буквами с тремя восклицательными знаками, а второй строкой пишет, сколько в сообщении символов.</p>`,
-      code: [{ file: "bot.py · функция echo", lang: "py", src: R`async def echo(update, context):
-    text = update.message.text
-    answer = f"🔊 {text.⟦upper⟧()}!!!\n"
-    answer += f"Символов: {⟦len⟧(text)}"
-    await update.message.reply_text(⟦answer⟧)` }],
-      chat: [["me","Я кот"],["bot","🔊 Я КОТ!!!\nСимволов: 5"]],
-      after: `<p>Попробуй ещё: <code>text.title()</code> — Каждое Слово С Заглавной, <code>text.replace(" ", " 🐾 ")</code> — кошачьи следы вместо пробелов.</p>` },
+      after: `<ol><li>Запусти: правый клик по <code>bot.py</code> → <b>Run 'bot'</b>. Напиши боту — он повторяет сообщение.</li><li>Проверь, что в <code>bot.py</code> больше нигде нет токена.</li><li>Проверь защиту: переименуй <code>.env</code> в <code>x.env</code> и перезапусти — внизу появится «Нет BOT_TOKEN: проверь файл .env». Верни имя <code>.env</code>.</li></ol>`,
+      chat: [["me","Привет"],["bot","Привет"]] },
+
     { title: "Бот-шутник",
-      slide: ["import random — в начало файла", "Список JOKES и функция joke", "Обработчик /joke — выше эха"],
-      body: `<p>Команда <code>/joke</code> отправляет случайную шутку из списка. <code>import random</code> добавь к импортам в начале файла, список и функцию — выше <code>main()</code>, обработчик — в <code>main()</code> до обработчика эха.</p>`,
-      code: [{ file: "bot.py · добавить", lang: "py", src: R`import ⟦random⟧
+      body: `<p>Теперь бот на любое сообщение отвечает случайной шуткой. Четыре изменения в <code>bot.py</code>:</p><ol><li>В начало файла, к остальным <code>import</code>, добавь <code>import random</code>.</li><li>После строк с токеном добавь список шуток <code>JOKES</code>.</li><li>Функцию <code>echo</code> замени функцией <code>joke</code>.</li><li>В <code>main()</code> в строке с <code>MessageHandler</code> замени <code>echo</code> на <code>joke</code>.</li></ol>`,
+      twoCol: [
+        { label: "Было", file: "bot.py · функция и main()", lang: "py", src: R`async def echo(update, context):
+    text = update.message.text
+    await update.message.reply_text(text)
+
+# в main():
+app.add_handler(MessageHandler(filters.TEXT, echo))` },
+        { label: "Стало", file: "bot.py · функция и main()", lang: "py", src: R`JOKES = [
+    "Есть 10 типов людей: кто знает двоичный код и кто нет.",
+    "Работает? Не трогай!",
+    "Лучший отладчик — объяснить код коту.",
+]
+
+
+async def joke(update, context):
+    text = random.choice(JOKES)
+    await update.message.reply_text(text)
+
+# в main():
+app.add_handler(MessageHandler(filters.TEXT, joke))` }],
+      after: `<p><code>random.choice(JOKES)</code> выбирает из списка случайную шутку. Не забудь <code>import random</code> в начале файла — иначе будет ошибка <code>NameError: name 'random' is not defined</code>.</p>`,
+      chat: [["me","Привет"],["bot","Работает? Не трогай!"],["me","Ещё!"],["bot","Лучший отладчик — объяснить код коту."]] },
+
+    { title: "Готовый бот-шутник и свои шутки",
+      body: `<p>Весь <code>bot.py</code> целиком. Перезапусти бота (<b>Rerun</b>, <kbd>Ctrl</kbd>+<kbd>F5</kbd>) и проверь.</p>`,
+      code: [{ file: "bot.py", lang: "py", src: R`import os
+import random
+import sys
+from dotenv import load_dotenv
+from telegram.ext import Application, MessageHandler, filters
+
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
+if not TOKEN:
+    sys.exit("Нет BOT_TOKEN: проверь файл .env")
 
 JOKES = [
     "Есть 10 типов людей: кто знает двоичный код и кто нет.",
@@ -337,89 +364,22 @@ JOKES = [
 
 
 async def joke(update, context):
-    text = random.⟦choice⟧(JOKES)
+    text = random.choice(JOKES)
     await update.message.reply_text(text)
 
-# в main():
-app.add_handler(CommandHandler("⟦joke⟧", joke))` }],
-      chat: [["me","/joke"],["bot","Лучший отладчик — объяснить код коту."],["me","/joke"],["bot","Работает? Не трогай!"]] },
-    { title: "Своя коллекция и команда /fact",
-      slide: ["Добавить в JOKES 5+ своих шуток", "Команда /fact по образцу /joke", "В main(): сначала команды, в конце эхо"],
-      body: `<ol><li>Добавь в <code>JOKES</code> минимум пять своих шуток: каждая — строка в кавычках, после неё запятая.</li><li>По образцу <code>/joke</code> сделай команду <code>/fact</code>: свой список <code>FACTS</code> и случайный факт из него.</li><li>Допиши <code>/fact</code> в приветствие <code>/start</code> и проверь порядок обработчиков.</li></ol>`,
-      code: [{ file: "bot.py · добавить", lang: "py", src: R`FACTS = [
-    "Python назван не в честь змеи, а в честь комик-группы «Монти Пайтон».",
-    "Первый компьютерный «баг» был настоящей молью в реле (1947).",
-]
 
-
-async def fact(update, context):
-    await update.message.reply_text("🧠 " + random.⟦choice⟧(⟦FACTS⟧))` },
-        { file: "bot.py · main()", lang: "py", src: R`def main():
+def main():
     app = Application.builder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", ⟦start⟧))
-    app.add_handler(CommandHandler("joke", ⟦joke⟧))
-    app.add_handler(CommandHandler("⟦fact⟧", fact))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ⟦echo⟧))
-    print("Бот запущен. Остановить: красный квадрат в PyCharm")
-    app.run_polling()` }],
-      chat: [["me","/fact"],["bot","🧠 Python назван не в честь змеи, а в честь комик-группы «Монти Пайтон»."]],
-      callout: ["info", "<b>Сохрани проект.</b> Завтра на его основе сделаем бота, который отвечает с помощью нейросети."] },
-  ],
-  middle: [
-    { title: "Токен и настройки в .env",
-      slide: ["Сам: .env с BOT_TOKEN и BOT_NAME", "Сам: .gitignore для .env и .venv/", "pip install python-dotenv"],
-      body: `<p>Установи <code>python-dotenv</code> в терминале PyCharm. Рядом с <code>bot.py</code> создай файл <code>.env</code> с двумя строками: токен бота и его имя (<code>BOT_NAME</code>), например «Шутник». Создай <code>.gitignore</code>, чтобы в git не попали ни секреты, ни папка окружения <code>.venv</code>.</p>`,
-      hint: { text: `<p>Формат <code>.env</code> — по одной паре <code>ИМЯ=значение</code> на строку, без кавычек и пробелов. В <code>.gitignore</code> — по одному имени файла или папки на строку. Нет токена — <code>@BotFather</code> → <code>/newbot</code>.</p>` } },
-    { title: "Читаем токен и имя бота",
-      slide: ["load_dotenv() и os.getenv()", "Нет токена или нет «:» → sys.exit", "BOT_NAME с именем по умолчанию"],
-      body: `<p>Напиши начало <code>bot.py</code> сам:</p><ul><li>токен из <code>.env</code>; если его нет — выход с понятным сообщением;</li><li>если в токене нет двоеточия — выход с сообщением «не похоже на токен»;</li><li>имя из <code>BOT_NAME</code>, а если строки нет — «Шутник»;</li><li>при запуске в консоль: <code>Бот Шутник запущен</code>.</li></ul>`,
-      hint: { text: `<p>У <code>os.getenv</code> есть второй аргумент — значение по умолчанию. Выйти с сообщением: <code>sys.exit("текст")</code>.</p>`,
-        code: { file: "фрагмент", lang: "py", src: R`load_dotenv()
-TOKEN = os.getenv("BOT_TOKEN")
-BOT_NAME = os.getenv("BOT_NAME", "Шутник")
-if ":" not in TOKEN:
-    ...` } } },
-    { title: "/start с именем и эхо без команд",
-      slide: ["/start: имя бота из BOT_NAME и список команд", "Эхо не трогает команды", "Проверить: /abc — бот молчит"],
-      body: `<p>Команда <code>/start</code> представляет бота по имени из <code>.env</code> и перечисляет его команды. Эхо отвечает на любой текст, кроме команд. Отправь <code>/abc</code> — бот должен промолчать. Объясни соседу, почему.</p>`,
-      chat: [["me","/start"],["bot","Привет! Я Шутник 🤖\nНапиши что-нибудь — отвечу.\n/joke — шутка"],["me","/abc"],["bot","…тишина"]],
-      hint: { text: `<p>Имя в строку подставит f-строка: <code>f"Привет! Я {BOT_NAME} 🤖"</code>. Фильтры соединяются знаками: <code>&amp;</code> — «и», <code>~</code> — «не». Команды регистрируй выше эха.</p>` } },
-    { title: "Умный собеседник",
-      slide: ["Эхо → ответы по правилам", "привет / как дела / спасибо / пока", "Иначе: текст, символы и слова"],
-      body: `<p>Замени эхо функцией, которая выбирает ответ по правилам (регистр букв не важен):</p>
-        <ul><li>есть слово «привет» → приветствие и подсказка про <code>/joke</code>;</li><li>есть «как дела» → любой ответ про дела;</li><li>есть «спасибо» или «пока» → вежливый ответ;</li><li>иначе → текст, число символов и число слов.</li></ul>`,
-      chat: [["me","Привет!"],["bot","Привет! 👋 Хочешь шутку? Жми /joke"],["me","Как дела"],["bot","Отлично! Работаю без перерыва ⚡"],["me","Я кот"],["bot","Ты написал: Я кот\nСимволов: 5, слов: 2"]],
-      hint: { text: `<p>Пригодятся <code>text.lower()</code> и оператор <code>in</code>. Цепочка проверок: <code>if</code> / <code>elif</code> / <code>else</code>. Слова: <code>text.split()</code> разрезает строку по пробелам в список, <code>len()</code> считает его элементы.</p>`,
-        code: { file: "фрагмент", lang: "py", src: R`low = text.lower()
-if "привет" in low:
-    answer = "Привет! 👋 Хочешь шутку? Жми /joke"
-elif ...` } } },
-    { title: "Шутки по темам",
-      slide: ["Словарь: тема → список шуток", "/it, /school, /animals — одной функцией", "/joke — из любой темы"],
-      body: `<p>Храни шутки в словаре: ключ — тема (<code>it</code>, <code>school</code>, <code>animals</code>), значение — список шуток. Команды <code>/it</code>, <code>/school</code>, <code>/animals</code> присылают шутку на свою тему — сделай это <b>одной</b> функцией. <code>/joke</code> присылает шутку из любой темы.</p>`,
-      chat: [["me","/school"],["bot","Учитель: «Назови пять животных Африки». Ученик: «Три льва и два слона»."],["me","/joke"],["bot","Кот считает клавиатуру лежанкой с подогревом."]],
-      hint: { text: `<p><code>CommandHandler</code> принимает и список команд. Какую прислали, видно по тексту: срез <code>[1:]</code> убирает «/». Для <code>/joke</code> собери все шутки в один список циклом.</p>`,
-        code: { file: "фрагмент", lang: "py", src: R`async def topic_joke(update, context):
-    topic = update.message.text[1:]      # "/it" -> "it"
-    await update.message.reply_text(random.choice(JOKES[topic]))
+    app.add_handler(MessageHandler(filters.TEXT, joke))
+    app.run_polling()
 
-# в main():
-app.add_handler(CommandHandler(["it", "school", "animals"], topic_joke))` } } },
-    { title: "Колода без повторов",
-      slide: ["Колода: перемешанный список шуток", "Выдаём по одной: pop()", "Кончилась — перемешиваем заново"],
-      body: `<p>Сделай так, чтобы <code>/joke</code> не повторял шутки: как с колодой карт — перемешали все шутки из всех тем и выдаём по одной сверху. Колода кончилась — бот пишет «Перемешиваю колоду шуток 🔁» и собирает её заново.</p>`,
-      chat: [["me","/joke"],["bot","Перемешиваю колоду шуток 🔁"],["bot","Лучший отладчик — объяснить код коту."],["me","/joke"],["bot","Почему рыбы не играют в теннис? Боятся сетки."]],
-      hint: { text: `<p>Колода — обычный список вверху файла. <code>JOKES.values()</code> перебирает списки шуток всех тем, <code>deck.extend(список)</code> добавляет в колоду все элементы другого списка. <code>random.shuffle(список)</code> перемешивает, <code>список.pop()</code> достаёт последний элемент и убирает его. Пустой список в <code>if</code> считается «ложью».</p>`,
-        code: { file: "фрагмент", lang: "py", src: R`deck = []   # вверху файла
 
-async def joke(update, context):
-    if not deck:                          # колода пустая
-        for jokes in JOKES.values():
-            deck.extend(jokes)
-        random.shuffle(deck)
-        await update.message.reply_text("Перемешиваю колоду шуток 🔁")
-    await update.message.reply_text(deck.pop())` } } },
+if __name__ == "__main__":
+    main()` }],
+      after: `<p><b>Добавь свои шутки:</b> минимум пять. Каждая шутка — строка в кавычках, после неё запятая. Забудешь запятую — Python склеит две шутки в одну.</p>`,
+      callout: ["info", "<b>Сохрани проект.</b> Этот бот пригодится на следующих занятиях."] },
   ],
+  middle: [],
 },
 ];
 
@@ -554,7 +514,7 @@ function renderTask(t, n, key, onToggle) {
   const el = document.createElement("article");
   el.className = "task";
   el.id = key;
-  const doneKey = "d1s:done:" + key;
+  const doneKey = "d1n:done:" + key;
   el.innerHTML = `<div class="task-head"><div class="task-num">${n}</div><div class="task-title"><h3>${esc(t.title)}</h3></div>
     <label class="done-toggle"><input type="checkbox" id="chk-${key}"> Готово</label></div>`;
   const add = nodes => nodes.forEach(x => el.appendChild(x));
@@ -587,17 +547,12 @@ function renderPractice(p) {
       
       <h2>${esc(p.title)}</h2>
       <div class="practice-meta"><span class="progress"><span class="progress-bar"><i></i></span><span class="progress-text"></span></span></div>
-      <div class="levels" role="tablist" aria-label="Вариант заданий">
-        <button class="level-btn" role="tab" id="${p.id}-tab-basic" data-level="basic">Вариант 1<small>с шаблонами</small></button>
-        <button class="level-btn" role="tab" id="${p.id}-tab-middle" data-level="middle">Вариант 2<small>сам пишешь код</small></button>
-      </div>
-      <p class="level-note"></p>
     </div>
     <div class="tasks" data-level="basic" role="tabpanel"></div>
     <div class="tasks" data-level="middle" role="tabpanel"></div>`;
   const all = [];
   const update = () => {
-    const done = all.filter(k => store.get("d1s:done:" + k) === "1").length;
+    const done = all.filter(k => store.get("d1n:done:" + k) === "1").length;
     sec.querySelector(".progress-bar i").style.width = (100 * done / all.length) + "%";
     sec.querySelector(".progress-text").textContent = `${done} из ${all.length}`;
   };
@@ -614,13 +569,15 @@ function renderPractice(p) {
     middle: "Шаги те же, но код пишешь сам. Работай в своём bot.py.",
   };
   const setLevel = level => {
+    sec.querySelectorAll(".tasks").forEach(t => t.hidden = t.dataset.level !== level);
+  };
+  const setLevelOld = level => {
     sec.querySelectorAll(".level-btn").forEach(b => b.setAttribute("aria-selected", String(b.dataset.level === level)));
     sec.querySelectorAll(".tasks").forEach(t => t.hidden = t.dataset.level !== level);
     sec.querySelector(".level-note").textContent = notes[level];
     store.set("d1s:level:" + p.id, level);
   };
-  sec.querySelectorAll(".level-btn").forEach(b => b.addEventListener("click", () => setLevel(b.dataset.level)));
-  setLevel(store.get("d1s:level:" + p.id) === "middle" ? "middle" : "basic");
+  setLevel("basic");
   update();
   return sec;
 }
