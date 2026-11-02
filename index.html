@@ -1,0 +1,631 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Бот-шутник · день 1</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: одна колонка ~860px, как лента чата; задания — «сообщения» с кодом и превью диалога */
+:root {
+  --bg: #EDF2F7;
+  --surface: #FFFFFF;
+  --surface-2: #F5F8FB;
+  --ink: #15233A;
+  --muted: #5E6B80;
+  --line: #D9E2EC;
+  --accent: #1E8FC7;
+  --accent-soft: #DCEBF7;
+  --amber: #C98512;
+  --amber-soft: #FCEFD6;
+  --green: #2E9A63;
+  --green-soft: #DDF3E6;
+  --red: #CF4A37;
+  --red-soft: #FBE3DF;
+  --bubble-in: #FFFFFF;
+  --bubble-out: #E1F5D8;
+  --chat-bg: #D7E3EE;
+  --key-bg: rgba(255,255,255,.7);
+  --key-bar: #C3D4E4;
+  --code-bg: #F6F8FB;
+  --code-fg: #15233A;
+  --code-kw: #0B62A8;
+  --code-str: #24803F;
+  --code-com: #6C7A91;
+  --code-num: #A65300;
+  --code-fn: #A1307A;
+  --blank-bg: #FFF3D6;
+  --font-display: "Unbounded", "Golos Text", system-ui, sans-serif;
+  --font-body: "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 900px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--accent); }
+code, kbd { font-family: var(--font-mono); font-size: .9em; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 0 .3em; overflow-wrap: anywhere; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+
+/* шапка */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 16px; padding-block: 10px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 15px; letter-spacing: .01em; margin-right: auto; }
+.brand-mark { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; flex: none; }
+.brand-mark svg { width: 16px; height: 16px; fill: #fff; transform: translateX(-1px); }
+.days { display: flex; gap: 6px; flex-wrap: wrap; }
+.day-pill { font: 600 14px var(--font-body); border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); border-radius: 999px; padding: 6px 14px; }
+.day-pill[aria-current="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.day-pill:disabled { opacity: .55; cursor: not-allowed; }
+
+/* герой дня */
+.hero { padding-block: 40px 24px; display: grid; gap: 14px; }
+.eyebrow { font-weight: 600; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.hero h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(26px, 5vw, 40px); line-height: 1.15; }
+.hero .teacher { color: var(--ink); font-weight: 600; font-size: 16px; }
+.hero p { margin: 0; max-width: 65ch; color: var(--muted); font-size: 17px; }
+.schedule { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.slot { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 2px; min-width: 0; }
+.slot time { font-family: var(--font-mono); font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+.slot b { font-size: 15px; }
+.slot span { color: var(--muted); font-size: 13px; }
+.slot.practice { background: var(--accent-soft); border-color: transparent; }
+.slot.practice a { text-decoration: none; color: inherit; display: grid; gap: 2px; }
+
+/* легенда */
+.legend { margin-top: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; font-size: 15px; }
+.legend-row { display: block; }
+.blank-demo { font-family: var(--font-mono); background: var(--code-bg); color: var(--code-num); border-radius: 6px; padding: 2px 8px; font-size: 13px; border-bottom: 2px solid var(--amber); }
+
+/* практика */
+.practice-head { padding-block: 40px 14px; display: grid; gap: 10px; scroll-margin-top: 70px; }
+.practice-head h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 4vw, 30px); line-height: 1.2; }
+.practice-meta { display: flex; gap: 10px 18px; flex-wrap: wrap; color: var(--muted); font-size: 15px; align-items: center; }
+.progress { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+.progress-bar { width: 120px; height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.progress-bar i { display: block; height: 100%; width: 0; background: var(--green); transition: width .3s; }
+.levels { display: inline-flex; padding: 4px; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; margin-top: 6px; width: fit-content; max-width: 100%; flex-wrap: wrap; }
+.level-btn { font: 600 15px var(--font-body); border: 0; background: transparent; color: var(--muted); padding: 8px 14px; border-radius: 9px; cursor: pointer; }
+.level-btn small { font-weight: 500; font-size: 12px; opacity: .8; margin-left: 4px; }
+.level-btn[aria-selected="true"] { background: var(--ink); color: var(--surface); }
+.level-note { color: var(--muted); font-size: 15px; margin: 4px 0 0; max-width: 65ch; }
+
+.tasks { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding-bottom: 8px; }
+.task { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; min-width: 0; }
+.task.done { border-color: var(--green); }
+.task-head { display: flex; gap: 14px; align-items: flex-start; }
+.task-num { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font: 700 15px var(--font-display); background: var(--accent-soft); color: var(--accent); }
+.task.done .task-num { background: var(--green); color: #fff; }
+.task-title { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.task-title h3 { font-size: 19px; font-weight: 700; line-height: 1.3; }
+.task-title .time { color: var(--muted); font-size: 14px; }
+.done-toggle { flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); cursor: pointer; user-select: none; padding: 6px 10px; border-radius: 9px; border: 1px solid var(--line); }
+.done-toggle input { width: 18px; height: 18px; accent-color: var(--green); margin: 0; }
+.task p { margin: 0; max-width: 70ch; }
+.task ol, .task ul { margin: 0; padding-left: 22px; display: grid; gap: 4px; max-width: 70ch; }
+.task li::marker { color: var(--muted); }
+
+/* код */
+.code { background: var(--code-bg); color: var(--code-fg); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; min-width: 0; }
+.code-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); font: 13px var(--font-mono); color: var(--code-com); flex-wrap: wrap; }
+.code-bar .file { margin-right: auto; }
+.code-btn { font: 600 13px var(--font-body); color: var(--code-fg); background: #FFFFFF; border: 1px solid var(--line); border-radius: 7px; padding: 4px 10px; cursor: pointer; }
+.code-btn:hover { background: #EAF1F8; }
+.code-btn.primary { background: #229ED9; border-color: #229ED9; color: #fff; }
+.code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font: 15px/1.6 var(--font-mono); tab-size: 4; }
+.code .kw { color: var(--code-kw); } .code .str { color: var(--code-str); } .code .com { color: var(--code-com); font-style: italic; }
+.code .num { color: var(--code-num); } .code .fn { color: var(--code-fn); }
+.blank { font: inherit; color: var(--code-num); background: var(--blank-bg); border: 0; border-bottom: 2px solid #F2A93B; border-radius: 4px 4px 0 0; padding: 0 4px; margin: 0 1px; min-width: 4ch; outline: none; }
+.blank:focus { background: #FFE6A8; }
+.blank.ok { border-bottom-color: #2E9A63; color: #1E7A45; background: #E4F5EA; }
+.blank.bad { border-bottom-color: #CF4A37; color: #B0321F; background: #FBE3DF; }
+.check-msg { font: 600 12px var(--font-body); }
+.check-msg.ok { color: #1E7A45; } .check-msg.bad { color: #B0321F; }
+
+/* чат */
+.chat { background: var(--chat-bg); border-radius: 14px; padding: 14px; display: grid; gap: 6px; }
+.chat-label { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.msg { max-width: 82%; padding: 7px 12px; border-radius: 14px; font-size: 15px; line-height: 1.4; white-space: pre-line; box-shadow: 0 1px 0 rgba(0,0,0,.06); overflow-wrap: anywhere; }
+.msg.me { justify-self: end; background: var(--bubble-out); border-bottom-right-radius: 4px; }
+.msg.bot { justify-self: start; background: var(--bubble-in); border-bottom-left-radius: 4px; }
+.msg.cmd { font-family: var(--font-mono); font-size: 14px; }
+
+.inline-keys { justify-self: start; display: grid; gap: 4px; width: min(82%, 360px); margin-top: -2px; }
+.key-row { display: flex; gap: 4px; }
+.key-row span { flex: 1; min-width: 0; text-align: center; padding: 6px 10px; border-radius: 9px; font-size: 14px; font-weight: 600; color: var(--accent); background: var(--key-bg); overflow-wrap: anywhere; }
+.reply-kb { display: grid; gap: 6px; padding: 6px; border-radius: 12px; background: var(--key-bar); margin-top: 2px; }
+.reply-kb .key-row span { background: var(--surface); color: var(--ink); border: 1px solid var(--line); padding: 8px 10px; }
+.svc-switch { display: grid; gap: 8px; margin-top: 6px; padding: 14px 16px; border-radius: 14px; background: var(--accent-soft); }
+.svc-switch .svc-title { font-weight: 700; }
+.svc-switch .levels { margin-top: 0; }
+.svc-only { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+:root[data-svc="groq"] .svc-openrouter, :root[data-svc="openrouter"] .svc-groq { display: none !important; }
+.steps { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 8px; }
+.steps li { display: flex; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-width: 0; }
+.steps li b { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; font-size: 15px; }
+.steps li span { min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+.pycharm { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; }
+.pycharm summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+.pycharm ol { margin: 10px 0 0; padding-left: 22px; display: grid; gap: 6px; }
+.hero p b { color: var(--ink); }
+.callout { border-radius: 12px; padding: 12px 14px; font-size: 15px; display: grid; gap: 4px; }
+.callout.warn { background: var(--amber-soft); }
+.callout.info { background: var(--accent-soft); }
+.callout b { font-weight: 700; }
+
+details.hint { border: 1px dashed var(--line); border-radius: 12px; padding: 10px 14px; }
+details.hint summary { cursor: pointer; font-weight: 600; color: var(--accent); }
+details.hint[open] { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+details.hint[open] summary { margin-bottom: 4px; }
+
+.two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.col-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+
+/* шпаргалка */
+.cheat { padding-block: 40px 56px; display: grid; gap: 14px; }
+.cheat h2 { font-family: var(--font-display); font-weight: 700; font-size: 24px; }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-family: var(--font-mono); font-size: 13.5px; white-space: nowrap; }
+footer { color: var(--muted); font-size: 13px; padding-block: 0 40px; }
+
+button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 720px) {
+  .schedule { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two-col { grid-template-columns: minmax(0, 1fr); }
+  .task { padding: 16px; }
+  .task-head { flex-wrap: wrap; }
+  .done-toggle { margin-left: 54px; }
+  .task-title { flex-basis: calc(100% - 60px); }
+  .msg { max-width: 92%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21.5 3.6 2.9 10.8c-1.3.5-1.2 1.3-.2 1.6l4.8 1.5 1.8 5.6c.2.7.4.9.9.9.4 0 .6-.2.9-.4l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.9-1.4-1.5zM8.3 13.6l9.4-5.9c.4-.3.8-.1.5.2l-7.8 7-.3 3.3z"/></svg></span>
+      <span>Telegram-бот с ИИ · день 1</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">День 1</div>
+    <h1>Бот-шутник: токен в .env, /start и эхо</h1>
+    <p><b>Цель</b> — безопасный бот-шутник: хранение токена в файле .env, обработка команды /start, эхо без повторения команд и случайные шутки из списка.</p>
+    <ol class="steps">
+      <li><b>1</b><span>Токен в .env</span></li>
+      <li><b>2</b><span>Бот читает токен из .env</span></li>
+      <li><b>3</b><span>/start и эхо без команд</span></li>
+      <li><b>4</b><span>Эхо-громкоговоритель</span></li>
+      <li><b>5</b><span>Бот-шутник</span></li>
+      <li><b>6</b><span>Своя коллекция и команда /fact</span></li>
+    </ol>
+    <div class="legend">
+      <div class="legend-row"><b>Вариант 1</b> — код почти готов. Впиши пропуски <span class="blank-demo">&nbsp;&nbsp;&nbsp;&nbsp;</span>, нажми «Проверить», затем «Скопировать» и вставь код в PyCharm.</div>
+      <div class="legend-row"><b>Вариант 2</b> — есть задача и пример диалога, код пишешь сам в PyCharm. Застрял — открой подсказку.</div>
+      <div class="legend-row">Номер задания совпадает с номером шага на экране. Сделал — отметь «Готово».</div>
+    </div>
+    <details class="pycharm">
+      <summary>Как работать в PyCharm</summary>
+      <ol>
+        <li><b>Проект.</b> Открой проект с эхо-ботом или создай новый: <b>File → New Project</b>, интерпретатор — Python 3.12 (Project venv).</li>
+        <li><b>Библиотеки.</b> Внизу открой <b>Terminal</b> (<kbd>Alt</kbd>+<kbd>F12</kbd>) и выполни <code>pip install python-telegram-bot python-dotenv</code>.</li>
+        <li><b>Файлы.</b> Правый клик по папке проекта → <b>New → File</b> (для <code>.env</code> и <code>.gitignore</code>) или <b>New → Python File</b> (для <code>bot.py</code>).</li>
+        <li><b>Код с сайта.</b> «Скопировать» → в PyCharm <kbd>Ctrl</kbd>+<kbd>V</kbd>. Отступы внутри функций — 4 пробела, PyCharm ставит их сам.</li>
+        <li><b>Запуск.</b> Правый клик по <code>bot.py</code> → <b>Run 'bot'</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F10</kbd>). Дальше — зелёный треугольник вверху.</li>
+        <li><b>Перезапуск после правок.</b> Кнопка <b>Rerun</b> (<kbd>Ctrl</kbd>+<kbd>F5</kbd>): старая копия остановится, новая запустится. Остановить — красный квадрат (<kbd>Ctrl</kbd>+<kbd>F2</kbd>).</li>
+      </ol>
+    </details>
+  </section>
+
+  <div id="practices"></div>
+
+  <section class="cheat" id="errors">
+    <h2>Если что-то пошло не так</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Что видим</th><th>Что сделать</th></tr></thead>
+        <tbody>
+          <tr><td>No module named 'dotenv' / 'telegram'</td><td>В терминале PyCharm: <code>pip install python-telegram-bot python-dotenv</code></td></tr>
+          <tr><td>Нет BOT_TOKEN</td><td>Файл <code>.env</code> лежит рядом с <code>bot.py</code>, называется ровно <code>.env</code>, внутри <code>BOT_TOKEN=…</code> без кавычек и пробелов</td></tr>
+          <tr><td>InvalidToken</td><td>Токен скопирован не полностью или с лишним символом. Скопируй заново из @BotFather</td></tr>
+          <tr><td>Conflict: terminated by other getUpdates</td><td>Бот запущен дважды. Останови лишние запуски красным квадратом и перезапускай через Rerun</td></tr>
+          <tr><td>Бот повторяет /joke вместо шутки</td><td>В фильтре эха нет <code>~filters.COMMAND</code> или эхо стоит выше команд</td></tr>
+          <tr><td>NameError: name 'CommandHandler' / 'random' is not defined</td><td>Не дописан импорт в начале файла</td></tr>
+          <tr><td>IndentationError</td><td>Внутри функции отступ ровно 4 пробела. Выдели код и нажми <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>L</kbd></td></tr>
+          <tr><td>Изменения не работают</td><td>Файл сохранён, но бот не перезапущен: нажми Rerun (<kbd>Ctrl</kbd>+<kbd>F5</kbd>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<footer class="wrap">Интенсив «Разработка Telegram-бота с интеграцией искусственного интеллекта» · ИИТ БГУИР</footer>
+
+<script>
+/* ---------- данные заданий ----------
+   ⟦ответ⟧ — пропуск в шаблоне; варианты через |  */
+const R = String.raw;
+
+const PRACTICES = [
+{
+  id: "p1", title: "Задания по шагам", goal: "",
+  basic: [
+    { title: "Токен в .env",
+      slide: ["Установить python-dotenv", "Создать файлы .env и .gitignore", "Вписать свой токен в .env"],
+      body: `<p>Переносим токен из кода в отдельный файл. Открой в PyCharm проект с эхо-ботом (или создай новый) и установи библиотеку в терминале PyCharm.</p>`,
+      code: [{ file: "терминал PyCharm", lang: "shell", src: R`pip install python-telegram-bot ⟦python-dotenv⟧` }],
+      after: `<p>Рядом с <code>bot.py</code> создай два файла: правый клик по папке проекта → <b>New → File</b> → имя файла. Вставь свой токен вместо примера — без кавычек и пробелов вокруг «=».</p>`,
+      twoCol: [
+        { label: "Файл .env", file: ".env", lang: "plain", src: R`⟦BOT_TOKEN⟧=7712345678:AAHk3v…твой_токен` },
+        { label: "Файл .gitignore", file: ".gitignore", lang: "plain", src: R`⟦.env⟧
+.venv/` }],
+      callout: ["info", "<b>Нет бота или токена?</b> Открой в Telegram <code>@BotFather</code> → <code>/newbot</code> → придумай имя и username, который заканчивается на <code>bot</code>. BotFather пришлёт токен — его и вставляй в <code>.env</code>."] },
+    { title: "Бот читает токен из .env",
+      slide: ["Заменить начало bot.py шаблоном", "Запустить бота и проверить эхо", "Переименовать .env и увидеть понятную ошибку"],
+      body: `<p>Перепиши <code>bot.py</code>: токен берём из <code>.env</code>, а если его нет — программа сразу говорит, что не так. Заполни пропуски, нажми «Проверить», скопируй код в PyCharm и запусти.</p>`,
+      code: [{ file: "bot.py", lang: "py", src: R`import os
+import sys
+from dotenv import ⟦load_dotenv⟧
+from telegram.ext import Application, MessageHandler, filters
+
+⟦load_dotenv⟧()
+TOKEN = os.⟦getenv⟧("BOT_TOKEN")
+if not TOKEN:
+    sys.⟦exit⟧("Нет BOT_TOKEN: проверь файл .env")
+
+
+async def echo(update, context):
+    await update.message.reply_text(update.message.text)
+
+
+def main():
+    app = Application.builder().token(⟦TOKEN⟧).build()
+    app.add_handler(MessageHandler(filters.TEXT, echo))
+    print("Бот запущен. Остановить: красный квадрат в PyCharm")
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()` }],
+      chat: [["me","Я кот"],["bot","Я кот"]],
+      after: `<p><b>Проверь защиту:</b> переименуй <code>.env</code> в <code>x.env</code> и запусти — внизу PyCharm должно появиться «Нет BOT_TOKEN: проверь файл .env». Верни имя обратно.</p>` },
+    { title: "/start и эхо без команд",
+      slide: ["Отправить боту /start — увидеть ошибку", "Добавить функцию start и CommandHandler", "Исправить фильтр эха: & ~filters.COMMAND"],
+      body: `<p>Отправь боту <code>/start</code>: эхо повторит команду. Исправляем: допиши <code>CommandHandler</code> в строку импорта, добавь функцию <code>start</code> выше <code>main()</code> и замени <code>main()</code>.</p>`,
+      code: [{ file: "bot.py · импорт", lang: "py", src: R`from telegram.ext import Application, ⟦CommandHandler⟧, MessageHandler, filters` },
+        { file: "bot.py · функция start", lang: "py", src: R`async def start(update, context):
+    await update.message.⟦reply_text⟧(
+        "Привет! Я бот-шутник 🤖\n"
+        "Напиши что-нибудь — отвечу по-своему.\n"
+        "Хочешь шутку? Жми /joke"
+    )` },
+        { file: "bot.py · main()", lang: "py", src: R`def main():
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("⟦start⟧", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.⟦COMMAND⟧, echo))
+    print("Бот запущен. Остановить: красный квадрат в PyCharm")
+    app.run_polling()` }],
+      chat: [["me","/start"],["bot","Привет! Я бот-шутник 🤖\nНапиши что-нибудь — отвечу по-своему.\nХочешь шутку? Жми /joke"],["me","Я кот"],["bot","Я кот"]],
+      after: `<p><b>Эксперимент:</b> поменяй две строки <code>add_handler</code> местами и убери <code>&amp; ~filters.COMMAND</code>. Что ответит бот на <code>/start</code>? Верни как было.</p>` },
+    { title: "Эхо-громкоговоритель",
+      slide: ["Заменить функцию echo", "upper() — заглавные буквы", "len() — число символов"],
+      body: `<p>Замени функцию <code>echo</code>: бот «кричит» — повторяет текст ЗАГЛАВНЫМИ буквами с тремя восклицательными знаками, а второй строкой пишет, сколько в сообщении символов.</p>`,
+      code: [{ file: "bot.py · функция echo", lang: "py", src: R`async def echo(update, context):
+    text = update.message.text
+    answer = f"🔊 {text.⟦upper⟧()}!!!\n"
+    answer += f"Символов: {⟦len⟧(text)}"
+    await update.message.reply_text(⟦answer⟧)` }],
+      chat: [["me","Я кот"],["bot","🔊 Я КОТ!!!\nСимволов: 5"]],
+      after: `<p>Попробуй ещё: <code>text.title()</code> — Каждое Слово С Заглавной, <code>text.replace(" ", " 🐾 ")</code> — кошачьи следы вместо пробелов.</p>` },
+    { title: "Бот-шутник",
+      slide: ["import random — в начало файла", "Список JOKES и функция joke", "Обработчик /joke — выше эха"],
+      body: `<p>Команда <code>/joke</code> отправляет случайную шутку из списка. <code>import random</code> добавь к импортам в начале файла, список и функцию — выше <code>main()</code>, обработчик — в <code>main()</code> до обработчика эха.</p>`,
+      code: [{ file: "bot.py · добавить", lang: "py", src: R`import ⟦random⟧
+
+JOKES = [
+    "Есть 10 типов людей: кто знает двоичный код и кто нет.",
+    "Работает? Не трогай!",
+    "Лучший отладчик — объяснить код коту.",
+]
+
+
+async def joke(update, context):
+    text = random.⟦choice⟧(JOKES)
+    await update.message.reply_text(text)
+
+# в main():
+app.add_handler(CommandHandler("⟦joke⟧", joke))` }],
+      chat: [["me","/joke"],["bot","Лучший отладчик — объяснить код коту."],["me","/joke"],["bot","Работает? Не трогай!"]] },
+    { title: "Своя коллекция и команда /fact",
+      slide: ["Добавить в JOKES 5+ своих шуток", "Команда /fact по образцу /joke", "В main(): сначала команды, в конце эхо"],
+      body: `<ol><li>Добавь в <code>JOKES</code> минимум пять своих шуток: каждая — строка в кавычках, после неё запятая.</li><li>По образцу <code>/joke</code> сделай команду <code>/fact</code>: свой список <code>FACTS</code> и случайный факт из него.</li><li>Допиши <code>/fact</code> в приветствие <code>/start</code> и проверь порядок обработчиков.</li></ol>`,
+      code: [{ file: "bot.py · добавить", lang: "py", src: R`FACTS = [
+    "Python назван не в честь змеи, а в честь комик-группы «Монти Пайтон».",
+    "Первый компьютерный «баг» был настоящей молью в реле (1947).",
+]
+
+
+async def fact(update, context):
+    await update.message.reply_text("🧠 " + random.⟦choice⟧(⟦FACTS⟧))` },
+        { file: "bot.py · main()", lang: "py", src: R`def main():
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", ⟦start⟧))
+    app.add_handler(CommandHandler("joke", ⟦joke⟧))
+    app.add_handler(CommandHandler("⟦fact⟧", fact))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ⟦echo⟧))
+    print("Бот запущен. Остановить: красный квадрат в PyCharm")
+    app.run_polling()` }],
+      chat: [["me","/fact"],["bot","🧠 Python назван не в честь змеи, а в честь комик-группы «Монти Пайтон»."]],
+      callout: ["info", "<b>Сохрани проект.</b> Завтра на его основе сделаем бота, который отвечает с помощью нейросети."] },
+  ],
+  middle: [
+    { title: "Токен и настройки в .env",
+      slide: ["Сам: .env с BOT_TOKEN и BOT_NAME", "Сам: .gitignore для .env и .venv/", "pip install python-dotenv"],
+      body: `<p>Установи <code>python-dotenv</code> в терминале PyCharm. Рядом с <code>bot.py</code> создай файл <code>.env</code> с двумя строками: токен бота и его имя (<code>BOT_NAME</code>), например «Шутник». Создай <code>.gitignore</code>, чтобы в git не попали ни секреты, ни папка окружения <code>.venv</code>.</p>`,
+      hint: { text: `<p>Формат <code>.env</code> — по одной паре <code>ИМЯ=значение</code> на строку, без кавычек и пробелов. В <code>.gitignore</code> — по одному имени файла или папки на строку. Нет токена — <code>@BotFather</code> → <code>/newbot</code>.</p>` } },
+    { title: "Читаем токен и имя бота",
+      slide: ["load_dotenv() и os.getenv()", "Нет токена или нет «:» → sys.exit", "BOT_NAME с именем по умолчанию"],
+      body: `<p>Напиши начало <code>bot.py</code> сам:</p><ul><li>токен из <code>.env</code>; если его нет — выход с понятным сообщением;</li><li>если в токене нет двоеточия — выход с сообщением «не похоже на токен»;</li><li>имя из <code>BOT_NAME</code>, а если строки нет — «Шутник»;</li><li>при запуске в консоль: <code>Бот Шутник запущен</code>.</li></ul>`,
+      hint: { text: `<p>У <code>os.getenv</code> есть второй аргумент — значение по умолчанию. Выйти с сообщением: <code>sys.exit("текст")</code>.</p>`,
+        code: { file: "фрагмент", lang: "py", src: R`load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
+BOT_NAME = os.getenv("BOT_NAME", "Шутник")
+if ":" not in TOKEN:
+    ...` } } },
+    { title: "/start с именем и эхо без команд",
+      slide: ["/start: имя бота из BOT_NAME и список команд", "Эхо не трогает команды", "Проверить: /abc — бот молчит"],
+      body: `<p>Команда <code>/start</code> представляет бота по имени из <code>.env</code> и перечисляет его команды. Эхо отвечает на любой текст, кроме команд. Отправь <code>/abc</code> — бот должен промолчать. Объясни соседу, почему.</p>`,
+      chat: [["me","/start"],["bot","Привет! Я Шутник 🤖\nНапиши что-нибудь — отвечу.\n/joke — шутка"],["me","/abc"],["bot","…тишина"]],
+      hint: { text: `<p>Имя в строку подставит f-строка: <code>f"Привет! Я {BOT_NAME} 🤖"</code>. Фильтры соединяются знаками: <code>&amp;</code> — «и», <code>~</code> — «не». Команды регистрируй выше эха.</p>` } },
+    { title: "Умный собеседник",
+      slide: ["Эхо → ответы по правилам", "привет / как дела / спасибо / пока", "Иначе: текст, символы и слова"],
+      body: `<p>Замени эхо функцией, которая выбирает ответ по правилам (регистр букв не важен):</p>
+        <ul><li>есть слово «привет» → приветствие и подсказка про <code>/joke</code>;</li><li>есть «как дела» → любой ответ про дела;</li><li>есть «спасибо» или «пока» → вежливый ответ;</li><li>иначе → текст, число символов и число слов.</li></ul>`,
+      chat: [["me","Привет!"],["bot","Привет! 👋 Хочешь шутку? Жми /joke"],["me","Как дела"],["bot","Отлично! Работаю без перерыва ⚡"],["me","Я кот"],["bot","Ты написал: Я кот\nСимволов: 5, слов: 2"]],
+      hint: { text: `<p>Пригодятся <code>text.lower()</code> и оператор <code>in</code>. Цепочка проверок: <code>if</code> / <code>elif</code> / <code>else</code>. Слова: <code>text.split()</code> разрезает строку по пробелам в список, <code>len()</code> считает его элементы.</p>`,
+        code: { file: "фрагмент", lang: "py", src: R`low = text.lower()
+if "привет" in low:
+    answer = "Привет! 👋 Хочешь шутку? Жми /joke"
+elif ...` } } },
+    { title: "Шутки по темам",
+      slide: ["Словарь: тема → список шуток", "/it, /school, /animals — одной функцией", "/joke — из любой темы"],
+      body: `<p>Храни шутки в словаре: ключ — тема (<code>it</code>, <code>school</code>, <code>animals</code>), значение — список шуток. Команды <code>/it</code>, <code>/school</code>, <code>/animals</code> присылают шутку на свою тему — сделай это <b>одной</b> функцией. <code>/joke</code> присылает шутку из любой темы.</p>`,
+      chat: [["me","/school"],["bot","Учитель: «Назови пять животных Африки». Ученик: «Три льва и два слона»."],["me","/joke"],["bot","Кот считает клавиатуру лежанкой с подогревом."]],
+      hint: { text: `<p><code>CommandHandler</code> принимает и список команд. Какую прислали, видно по тексту: срез <code>[1:]</code> убирает «/». Для <code>/joke</code> собери все шутки в один список циклом.</p>`,
+        code: { file: "фрагмент", lang: "py", src: R`async def topic_joke(update, context):
+    topic = update.message.text[1:]      # "/it" -> "it"
+    await update.message.reply_text(random.choice(JOKES[topic]))
+
+# в main():
+app.add_handler(CommandHandler(["it", "school", "animals"], topic_joke))` } } },
+    { title: "Колода без повторов",
+      slide: ["Колода: перемешанный список шуток", "Выдаём по одной: pop()", "Кончилась — перемешиваем заново"],
+      body: `<p>Сделай так, чтобы <code>/joke</code> не повторял шутки: как с колодой карт — перемешали все шутки из всех тем и выдаём по одной сверху. Колода кончилась — бот пишет «Перемешиваю колоду шуток 🔁» и собирает её заново.</p>`,
+      chat: [["me","/joke"],["bot","Перемешиваю колоду шуток 🔁"],["bot","Лучший отладчик — объяснить код коту."],["me","/joke"],["bot","Почему рыбы не играют в теннис? Боятся сетки."]],
+      hint: { text: `<p>Колода — обычный список вверху файла. <code>JOKES.values()</code> перебирает списки шуток всех тем, <code>deck.extend(список)</code> добавляет в колоду все элементы другого списка. <code>random.shuffle(список)</code> перемешивает, <code>список.pop()</code> достаёт последний элемент и убирает его. Пустой список в <code>if</code> считается «ложью».</p>`,
+        code: { file: "фрагмент", lang: "py", src: R`deck = []   # вверху файла
+
+async def joke(update, context):
+    if not deck:                          # колода пустая
+        for jokes in JOKES.values():
+            deck.extend(jokes)
+        random.shuffle(deck)
+        await update.message.reply_text("Перемешиваю колоду шуток 🔁")
+    await update.message.reply_text(deck.pop())` } } },
+  ],
+},
+];
+
+
+/* ---------- подсветка ---------- */
+const KW = new Set("import from def async await return if elif else for in not and or None True False while as with try except pass lambda is".split(" "));
+function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function hl(src, lang) {
+  if (lang === "plain") return esc(src);
+  if (lang === "shell") {
+    return src.split("\n").map(line => {
+      const m = line.match(/^(\s*)(\S+)(.*)$/);
+      if (!m || !/^(mkdir|cd|python3?|pip|source|\.venv)/.test(m[2])) return esc(line);
+      return esc(m[1]) + `<span class="kw">${esc(m[2])}</span>` + esc(m[3]);
+    }).join("\n");
+  }
+  const re = /(#[^\n]*)|("(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?)|(\b\d+\b)|([A-Za-z_][A-Za-z0-9_]*)|([\s\S])/g;
+  let out = "", m, prevDef = false;
+  while ((m = re.exec(src))) {
+    if (m[1]) out += `<span class="com">${esc(m[1])}</span>`;
+    else if (m[2]) out += `<span class="str">${esc(m[2])}</span>`;
+    else if (m[3]) out += `<span class="num">${m[3]}</span>`;
+    else if (m[4]) {
+      if (KW.has(m[4])) out += `<span class="kw">${m[4]}</span>`;
+      else if (prevDef) out += `<span class="fn">${m[4]}</span>`;
+      else out += m[4];
+      prevDef = m[4] === "def";
+      continue;
+    } else out += esc(m[5]);
+  }
+  return out;
+}
+
+/* ---------- построение ---------- */
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
+let blankId = 0;
+
+function codeBlock(c, taskKey) {
+  const wrap = document.createElement("div");
+  wrap.className = "code";
+  const parts = c.src.split(/⟦([^⟧]*)⟧/);
+  let html = "", hasBlanks = parts.length > 1;
+  parts.forEach((p, i) => {
+    if (i % 2 === 0) html += hl(p, c.lang);
+    else {
+      const answers = p.split("|");
+      const w = Math.max(...answers.map(a => a.length), 3) + 1;
+      const id = `b${taskKey}-${blankId++}`;
+      html += `<input class="blank" id="${id}" aria-label="Пропуск" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:${w}ch" data-answers="${esc(p)}">`;
+    }
+  });
+  wrap.innerHTML = `<div class="code-bar"><span class="file">${esc(c.file || "")}</span>${hasBlanks ? '<span class="check-msg" role="status"></span><button class="code-btn" data-act="check">Проверить</button>' : ""}<button class="code-btn primary" data-act="copy">Скопировать</button></div><pre></pre>`;
+  wrap.querySelector("pre").innerHTML = html;
+  const pre = wrap.querySelector("pre");
+  wrap.querySelector('[data-act="copy"]').addEventListener("click", e => copyCode(pre, e.currentTarget));
+  const chk = wrap.querySelector('[data-act="check"]');
+  if (chk) chk.addEventListener("click", () => checkBlanks(wrap));
+  pre.querySelectorAll(".blank").forEach(inp => inp.addEventListener("input", () => { inp.classList.remove("ok", "bad"); }));
+  return wrap;
+}
+
+function checkBlanks(wrap) {
+  const blanks = [...wrap.querySelectorAll(".blank")];
+  let bad = 0;
+  blanks.forEach(b => {
+    const ok = b.dataset.answers.split("|").some(a => a.trim() === b.value.trim());
+    b.classList.toggle("ok", ok); b.classList.toggle("bad", !ok);
+    if (!ok) bad++;
+  });
+  const msg = wrap.querySelector(".check-msg");
+  msg.className = "check-msg " + (bad ? "bad" : "ok");
+  msg.textContent = bad ? `Проверь пропуски: ${bad} из ${blanks.length}` : "Всё верно! Копируй код";
+}
+
+function codeText(pre) {
+  let s = "";
+  pre.childNodes.forEach(n => {
+    if (n.nodeType === 3) s += n.textContent;
+    else if (n.classList && n.classList.contains("blank")) s += n.value.trim() || "___";
+    else s += n.textContent;
+  });
+  return s;
+}
+
+function copyCode(pre, btn) {
+  const text = codeText(pre);
+  const done = () => { const t = btn.textContent; btn.textContent = "Скопировано"; setTimeout(() => btn.textContent = t, 1400); };
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+    if (ok) done(); else { btn.textContent = "Выдели код и нажми Ctrl+C"; }
+  };
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+}
+
+function chatBlock(chat) {
+  const d = document.createElement("div");
+  d.className = "chat";
+  const rows = (rs, cls) => `<div class="${cls}">` + rs.map(r => `<div class="key-row">${r.map(k => `<span>${esc(k)}</span>`).join("")}</div>`).join("") + `</div>`;
+  d.innerHTML = `<div class="chat-label">Как должно получиться</div>` + chat.map(([who, t, keys]) => {
+    if (who === "kb") return rows(t, "reply-kb");
+    let h = `<div class="msg ${who}${/^\/\w+/.test(t) && who === "me" ? " cmd" : ""}">${esc(t)}</div>`;
+    if (keys) h += rows(keys, "inline-keys");
+    return h;
+  }).join("");
+  return d;
+}
+
+function htmlNodes(h) { const t = document.createElement("template"); t.innerHTML = h; return [...t.content.childNodes]; }
+function svcWrap(value, build) {
+  if (value && value.__svc) {
+    const out = [];
+    for (const s of ["groq", "openrouter"]) {
+      if (value[s] == null) continue;
+      const box = document.createElement("div");
+      box.className = "svc-only svc-" + s;
+      build(value[s]).forEach(n => box.appendChild(n));
+      out.push(box);
+    }
+    return out;
+  }
+  return value == null ? [] : build(value);
+}
+
+function renderTask(t, n, key, onToggle) {
+  const el = document.createElement("article");
+  el.className = "task";
+  el.id = key;
+  const doneKey = "d1s:done:" + key;
+  el.innerHTML = `<div class="task-head"><div class="task-num">${n}</div><div class="task-title"><h3>${esc(t.title)}</h3></div>
+    <label class="done-toggle"><input type="checkbox" id="chk-${key}"> Готово</label></div>`;
+  const add = nodes => nodes.forEach(x => el.appendChild(x));
+  add(svcWrap(t.body, h => htmlNodes(h)));
+  add(svcWrap(t.code, cs => cs.map(c => codeBlock(c, key))));
+  add(svcWrap(t.twoCol, cols => {
+    const g = document.createElement("div"); g.className = "two-col";
+    cols.forEach(c => { const col = document.createElement("div"); col.style.minWidth = "0"; col.innerHTML = `<div class="col-label">${esc(c.label)}</div>`; col.appendChild(codeBlock(c, key)); g.appendChild(col); });
+    return [g];
+  }));
+  add(svcWrap(t.after, h => htmlNodes(h)));
+  add(svcWrap(t.chat, c => [chatBlock(c)]));
+  add(svcWrap(t.callout, c => htmlNodes(`<div class="callout ${c[0]}"><div>${c[1]}</div></div>`)));
+  add(svcWrap(t.hint, h => {
+    const det = document.createElement("details"); det.className = "hint";
+    det.innerHTML = `<summary>Подсказка</summary>${h.text}`;
+    if (h.code) det.appendChild(codeBlock(h.code, key + "h"));
+    return [det];
+  }));
+  const cb = el.querySelector(`#chk-${key}`);
+  cb.checked = store.get(doneKey) === "1";
+  el.classList.toggle("done", cb.checked);
+  cb.addEventListener("change", () => { store.set(doneKey, cb.checked ? "1" : "0"); el.classList.toggle("done", cb.checked); onToggle(); });
+  return el;
+}
+
+function renderPractice(p) {
+  const sec = document.createElement("section");
+  sec.innerHTML = `<div class="practice-head" id="${p.id}">
+      
+      <h2>${esc(p.title)}</h2>
+      <div class="practice-meta"><span class="progress"><span class="progress-bar"><i></i></span><span class="progress-text"></span></span></div>
+      <div class="levels" role="tablist" aria-label="Вариант заданий">
+        <button class="level-btn" role="tab" id="${p.id}-tab-basic" data-level="basic">Вариант 1<small>с шаблонами</small></button>
+        <button class="level-btn" role="tab" id="${p.id}-tab-middle" data-level="middle">Вариант 2<small>сам пишешь код</small></button>
+      </div>
+      <p class="level-note"></p>
+    </div>
+    <div class="tasks" data-level="basic" role="tabpanel"></div>
+    <div class="tasks" data-level="middle" role="tabpanel"></div>`;
+  const all = [];
+  const update = () => {
+    const done = all.filter(k => store.get("d1s:done:" + k) === "1").length;
+    sec.querySelector(".progress-bar i").style.width = (100 * done / all.length) + "%";
+    sec.querySelector(".progress-text").textContent = `${done} из ${all.length}`;
+  };
+  ["basic", "middle"].forEach(level => {
+    const box = sec.querySelector(`.tasks[data-level="${level}"]`);
+    p[level].forEach((t, i) => {
+      const key = `${p.id}-${level}-${i + 1}`;
+      all.push(key);
+      box.appendChild(renderTask(t, i + 1, key, update));
+    });
+  });
+  const notes = {
+    basic: "Шаги по порядку: каждый продолжает предыдущий. Всё готово раньше — попробуй задания варианта 2.",
+    middle: "Шаги те же, но код пишешь сам. Работай в своём bot.py.",
+  };
+  const setLevel = level => {
+    sec.querySelectorAll(".level-btn").forEach(b => b.setAttribute("aria-selected", String(b.dataset.level === level)));
+    sec.querySelectorAll(".tasks").forEach(t => t.hidden = t.dataset.level !== level);
+    sec.querySelector(".level-note").textContent = notes[level];
+    store.set("d1s:level:" + p.id, level);
+  };
+  sec.querySelectorAll(".level-btn").forEach(b => b.addEventListener("click", () => setLevel(b.dataset.level)));
+  setLevel(store.get("d1s:level:" + p.id) === "middle" ? "middle" : "basic");
+  update();
+  return sec;
+}
+
+const host = document.getElementById("practices");
+PRACTICES.filter(p => p.id === "p1").forEach(p => host.appendChild(renderPractice(p)));
+if (location.hash) { const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+</script>
